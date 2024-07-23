@@ -1,12 +1,18 @@
 "use client"
 import { CountryModel } from "@/app/domain/models"
-import { makeRemoteGetCountries } from "@/app/main/usecases"
+import {
+  makeRemoteGetCities,
+  makeRemoteGetCountries
+} from "@/app/main/usecases"
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
 import { useEffect, useState } from "react"
 import { initialState } from "./form-state"
 import styles from "./form.module.scss"
 
-export default function Form({ getCountries = makeRemoteGetCountries() }) {
+export default function Form({
+  getCountries = makeRemoteGetCountries(),
+  getCities = makeRemoteGetCities()
+}) {
   const [state, setState] = useState(initialState)
 
   const handleGetCountries = async () => {
@@ -25,29 +31,14 @@ export default function Form({ getCountries = makeRemoteGetCountries() }) {
     }
   }
 
-  const getCities = async () => {
+  const handleGetCities = async () => {
     setState((old) => ({ ...old, isCityLoading: true }))
     try {
-      const body = {
+      const responseCities = await getCities.get({
         country: state.currentCountry,
         state: state.currentState
-      }
-      const requestOptions: RequestInit = {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-type": "application/json"
-        },
-        body: JSON.stringify(body),
-        redirect: "follow"
-      }
-      const requestCities = await fetch(
-        "https://countriesnow.space/api/v0.1/countries/state/cities",
-        requestOptions
-      )
-      const responseCities = await requestCities.json()
-
-      const citiesList = responseCities?.data
+      })
+      const citiesList = responseCities
       setState((old) => ({ ...old, citiesList }))
     } catch (error) {
       console.log("error: ", error)
@@ -87,7 +78,7 @@ export default function Form({ getCountries = makeRemoteGetCountries() }) {
 
   useEffect(() => {
     if (state.currentState !== "") {
-      getCities()
+      handleGetCities()
     }
   }, [state.currentState])
 
