@@ -1,0 +1,23 @@
+.formWrapper {
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+  width: 100%;
+  max-width: 40rem;
+  .fieldWrapper {
+    label {
+      font-size: 0.875rem;
+    }
+    &[data-style="disabled"] {
+      * {
+        cursor: not-allowed;
+      }
+      label {
+        color: gray;
+      }
+      > div {
+        background-color: lightgray;
+      }
+    }
+  }
+}
