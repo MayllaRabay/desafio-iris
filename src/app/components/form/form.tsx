@@ -1,23 +1,111 @@
-"use client";
-import { FormControl, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
-import { initialState } from "./form-state";
-import styles from "./form.module.scss";
+"use client"
+import { CountryModel } from "@/app/domain/models"
+import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
+import { useEffect, useState } from "react"
+import { initialState } from "./form-state"
+import styles from "./form.module.scss"
 
 export default function Form() {
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(initialState)
 
-  const handleChangeCountry = (e: any) => {
-    setState({ ...state, currentCountry: e.target.value });
-  };
+  const getCountries = async () => {
+    setState((old) => ({ ...old, isCountryLoading: true }))
+    try {
+      const requestOptions: RequestInit = {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Content-type": "application/json"
+        },
+        redirect: "follow"
+      }
+      const requestCountries = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/states",
+        requestOptions
+      )
+      const responseCountries = await requestCountries.json()
 
-  const handleChangeState = (e: any) => {
-    setState({ ...state, currentState: e.target.value });
-  };
+      const countriesList = responseCountries?.data?.map(
+        (country: any) => country.name
+      )
+      const countriesAndStatesList = responseCountries?.data
+      setState((old) => ({ ...old, countriesList, countriesAndStatesList }))
+    } catch (error) {
+      console.log("error: ", error)
+    } finally {
+      setState((old) => ({ ...old, isCountryLoading: false }))
+    }
+  }
 
-  const handleChangeCity = (e: any) => {
-    setState({ ...state, currentCity: e.target.value });
-  };
+  const getCities = async () => {
+    setState((old) => ({ ...old, isCityLoading: true }))
+    try {
+      const body = {
+        country: state.currentCountry,
+        state: state.currentState
+      }
+      const requestOptions: RequestInit = {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify(body),
+        redirect: "follow"
+      }
+      const requestCities = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        requestOptions
+      )
+      const responseCities = await requestCities.json()
+
+      const citiesList = responseCities?.data
+      setState((old) => ({ ...old, citiesList }))
+    } catch (error) {
+      console.log("error: ", error)
+    } finally {
+      setState((old) => ({ ...old, isCityLoading: false }))
+    }
+  }
+
+  const handleChangeCountry = (e: SelectChangeEvent<string>) => {
+    const currentCountryObject: Array<CountryModel> =
+      state.countriesAndStatesList.filter(
+        (item) => item.name === e.target.value
+      )
+    const statesList = currentCountryObject[0].states.map((state) => state.name)
+    setState((old) => ({
+      ...old,
+      currentCountry: e.target.value,
+      currentState: "",
+      statesList,
+      currentCity: "",
+      citiesList: []
+    }))
+  }
+
+  const handleChangeState = (e: SelectChangeEvent<string>) => {
+    setState((old) => ({
+      ...old,
+      currentState: e.target.value,
+      currentCity: "",
+      citiesList: []
+    }))
+  }
+
+  const handleChangeCity = (e: SelectChangeEvent<string>) => {
+    setState((old) => ({ ...old, currentCity: e.target.value }))
+  }
+
+  useEffect(() => {
+    if (state.currentState !== "") {
+      getCities()
+    }
+  }, [state.currentState])
+
+  useEffect(() => {
+    getCountries()
+  }, [])
 
   return (
     <div className={styles.formWrapper}>
@@ -40,7 +128,13 @@ export default function Form() {
           onChange={handleChangeCountry}
           disabled={state.isCountryLoading}
         >
-          <MenuItem value={"Brasil"}>Brasil</MenuItem>
+          {state.countriesList?.map((country: string, index: number) => {
+            return (
+              <MenuItem key={index} value={country}>
+                {country}
+              </MenuItem>
+            )
+          })}
         </Select>
       </FormControl>
 
@@ -48,7 +142,10 @@ export default function Form() {
         fullWidth
         className={styles.fieldWrapper}
         data-style={
-          (state.isStateLoading || !state.currentCountry) && "disabled"
+          ((state.currentCountry && state.statesList.length === 0) ||
+            state.isStateLoading ||
+            !state.currentCountry) &&
+          "disabled"
         }
       >
         <label htmlFor="state-select">Estado</label>
@@ -63,24 +160,39 @@ export default function Form() {
                     ? "Carregando..."
                     : !state.currentCountry
                     ? "Selecione antes um País"
+                    : state.currentCountry && state.statesList.length === 0
+                    ? "Nenhum Estado disponível..."
                     : "Selecione um Estado"
           }
           value={state.currentState}
           onChange={handleChangeState}
-          disabled={state.isStateLoading || !state.currentCountry}
+          disabled={
+            (state.currentCountry && state.statesList.length === 0) ||
+            state.isStateLoading ||
+            !state.currentCountry
+          }
         >
-          <MenuItem value={"Bahia"}>Bahia</MenuItem>
-          <MenuItem value={"São Paulo"}>São Paulo</MenuItem>
-          <MenuItem value={"Rio de Janeiro"}>Rio de Janeiro</MenuItem>
+          {state.statesList?.map((state: string, index: number) => {
+            return (
+              <MenuItem key={index} value={state}>
+                {state}
+              </MenuItem>
+            )
+          })}
         </Select>
       </FormControl>
 
       <FormControl
         fullWidth
         className={styles.fieldWrapper}
-        data-style={(state.isCityLoading || !state.currentState) && "disabled"}
+        data-style={
+          ((state.currentState && state.citiesList.length === 0) ||
+            state.isCityLoading ||
+            !state.currentState) &&
+          "disabled"
+        }
       >
-        <label htmlFor="state-select">Cidade</label>
+        <label htmlFor="city-select">Cidade</label>
         <Select
           id="city-select"
           displayEmpty
@@ -92,15 +204,27 @@ export default function Form() {
                     ? "Carregando..."
                     : !state.currentState
                     ? "Selecione antes um Estado"
-                    : "Selecione um Estado"
+                    : state.currentState && state.citiesList.length === 0
+                    ? "Nenhuma Cidade disponível..."
+                    : "Selecione uma Cidade"
           }
           value={state.currentCity}
           onChange={handleChangeCity}
-          disabled={state.isCityLoading || !state.currentState}
+          disabled={
+            (state.currentState && state.citiesList.length === 0) ||
+            state.isCityLoading ||
+            !state.currentState
+          }
         >
-          <MenuItem value={"Salvador"}>Salvador</MenuItem>
+          {state.citiesList?.map((city: string, index: number) => {
+            return (
+              <MenuItem key={index} value={city}>
+                {city}
+              </MenuItem>
+            )
+          })}
         </Select>
       </FormControl>
     </div>
-  );
+  )
 }
