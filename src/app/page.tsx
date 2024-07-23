@@ -1,5 +1,5 @@
-import { Form } from "./components";
-import styles from "./page.module.scss";
+import { Form } from "./components"
+import styles from "./page.module.scss"
 
 export default function Home() {
   return (
@@ -7,5 +7,5 @@ export default function Home() {
       <h1>Encontre a sua cidade!</h1>
       <Form />
     </main>
-  );
+  )
 }

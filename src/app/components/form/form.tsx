@@ -1,34 +1,22 @@
 "use client"
 import { CountryModel } from "@/app/domain/models"
+import { makeRemoteGetCountries } from "@/app/main/usecases"
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
 import { useEffect, useState } from "react"
 import { initialState } from "./form-state"
 import styles from "./form.module.scss"
 
-export default function Form() {
+export default function Form({ getCountries = makeRemoteGetCountries() }) {
   const [state, setState] = useState(initialState)
 
-  const getCountries = async () => {
+  const handleGetCountries = async () => {
     setState((old) => ({ ...old, isCountryLoading: true }))
     try {
-      const requestOptions: RequestInit = {
-        method: "GET",
-        mode: "cors",
-        headers: {
-          "Content-type": "application/json"
-        },
-        redirect: "follow"
-      }
-      const requestCountries = await fetch(
-        "https://countriesnow.space/api/v0.1/countries/states",
-        requestOptions
-      )
-      const responseCountries = await requestCountries.json()
-
-      const countriesList = responseCountries?.data?.map(
+      const responseCountries = await getCountries.get()
+      const countriesList = responseCountries?.map(
         (country: any) => country.name
       )
-      const countriesAndStatesList = responseCountries?.data
+      const countriesAndStatesList = responseCountries
       setState((old) => ({ ...old, countriesList, countriesAndStatesList }))
     } catch (error) {
       console.log("error: ", error)
@@ -104,7 +92,7 @@ export default function Form() {
   }, [state.currentState])
 
   useEffect(() => {
-    getCountries()
+    handleGetCountries()
   }, [])
 
   return (
