@@ -1,16 +1,20 @@
+import { CountryModel } from "@/app/domain/models"
+
 interface FormStateTypes {
-  countriesList: Array<string>;
-  currentCountry: string;
-  isCountryLoading: boolean;
-  statesList: Array<string>;
-  currentState: string;
-  isStateLoading: boolean;
-  citiesList: Array<string>;
-  currentCity: string;
-  isCityLoading: boolean;
+  countriesAndStatesList: Array<CountryModel>
+  countriesList: Array<string>
+  currentCountry: string
+  isCountryLoading: boolean
+  statesList: Array<string>
+  currentState: string
+  isStateLoading: boolean
+  citiesList: Array<string>
+  currentCity: string
+  isCityLoading: boolean
 }
 
 export const initialState: FormStateTypes = {
+  countriesAndStatesList: [],
   countriesList: [],
   currentCountry: "",
   isCountryLoading: false,
@@ -19,5 +23,5 @@ export const initialState: FormStateTypes = {
   isStateLoading: false,
   citiesList: [],
   currentCity: "",
-  isCityLoading: false,
-};
+  isCityLoading: false
+}
