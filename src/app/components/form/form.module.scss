@@ -5,18 +5,15 @@
   width: 100%;
   max-width: 40rem;
   .fieldWrapper {
-    label {
-      font-size: 0.875rem;
-    }
     &[data-style="disabled"] {
       * {
         cursor: not-allowed;
       }
       label {
-        color: gray;
+        color: var(--color-gray-M);
       }
       > div {
-        background-color: lightgray;
+        background-color: var(--color-gray-XL);
       }
     }
   }
