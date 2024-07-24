@@ -1,9 +1,13 @@
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   row-gap: 2rem;
   padding: 2rem;
   min-height: 100vh;
+  footer {
+    font-weight: bold;
+    text-align: center;
+  }
 }

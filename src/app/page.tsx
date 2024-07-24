@@ -6,6 +6,7 @@ export default function Home() {
     <main className={styles.main}>
       <h1>Encontre a sua cidade!</h1>
       <Form />
+      <footer>Feito com ❤️ por Maylla Rabay ©2024</footer>
     </main>
   )
 }
