@@ -7,7 +7,7 @@ import {
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
 import { useEffect, useState } from "react"
 import { initialState } from "./form-state"
-import styles from "./form.module.scss"
+import styles from "./form-style.module.scss"
 
 export default function Form({
   getCountries = makeRemoteGetCountries(),
