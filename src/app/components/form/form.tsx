@@ -4,7 +4,14 @@ import {
   makeRemoteGetCities,
   makeRemoteGetCountries
 } from "@/app/main/usecases"
-import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material"
+import {
+  Alert,
+  FormControl,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Snackbar
+} from "@mui/material"
 import { useEffect, useState } from "react"
 import { initialState } from "./form-state"
 import styles from "./form-style.module.scss"
@@ -15,8 +22,15 @@ export default function Form({
 }) {
   const [state, setState] = useState(initialState)
 
+  const selectInputStyle = {
+    boxShadow: 1,
+    borderRadius: 2,
+    color: "var(--color-theme)",
+    height: "3rem"
+  }
+
   const handleGetCountries = async () => {
-    setState((old) => ({ ...old, isCountryLoading: true }))
+    setState((old) => ({ ...old, isCountryLoading: true, mainError: "" }))
     try {
       const responseCountries = await getCountries.get()
       const countriesList = responseCountries?.map(
@@ -24,15 +38,15 @@ export default function Form({
       )
       const countriesAndStatesList = responseCountries
       setState((old) => ({ ...old, countriesList, countriesAndStatesList }))
-    } catch (error) {
-      console.log("error: ", error)
+    } catch (error: any) {
+      setState((old) => ({ ...old, mainError: error.message }))
     } finally {
       setState((old) => ({ ...old, isCountryLoading: false }))
     }
   }
 
   const handleGetCities = async () => {
-    setState((old) => ({ ...old, isCityLoading: true }))
+    setState((old) => ({ ...old, isCityLoading: true, mainError: "" }))
     try {
       const responseCities = await getCities.get({
         country: state.currentCountry,
@@ -40,8 +54,8 @@ export default function Form({
       })
       const citiesList = responseCities
       setState((old) => ({ ...old, citiesList }))
-    } catch (error) {
-      console.log("error: ", error)
+    } catch (error: any) {
+      setState((old) => ({ ...old, mainError: error.message }))
     } finally {
       setState((old) => ({ ...old, isCityLoading: false }))
     }
@@ -73,7 +87,11 @@ export default function Form({
   }
 
   const handleChangeCity = (e: SelectChangeEvent<string>) => {
-    setState((old) => ({ ...old, currentCity: e.target.value }))
+    setState((old) => ({
+      ...old,
+      currentCity: e.target.value,
+      cityMessageSuccess: true
+    }))
   }
 
   useEffect(() => {
@@ -106,6 +124,7 @@ export default function Form({
           value={state.currentCountry}
           onChange={handleChangeCountry}
           disabled={state.isCountryLoading}
+          sx={selectInputStyle}
         >
           {state.countriesList?.map((country: string, index: number) => {
             return (
@@ -150,6 +169,7 @@ export default function Form({
             state.isStateLoading ||
             !state.currentCountry
           }
+          sx={selectInputStyle}
         >
           {state.statesList?.map((state: string, index: number) => {
             return (
@@ -194,6 +214,7 @@ export default function Form({
             state.isCityLoading ||
             !state.currentState
           }
+          sx={selectInputStyle}
         >
           {state.citiesList?.map((city: string, index: number) => {
             return (
@@ -204,6 +225,30 @@ export default function Form({
           })}
         </Select>
       </FormControl>
+      <Snackbar
+        open={state.cityMessageSuccess}
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity="success"
+          variant="outlined"
+          onClose={() => {
+            setState((old) => ({ ...old, cityMessageSuccess: false }))
+          }}
+        >
+          Parabéns! Você encontrou sua cidade!
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={!!state.mainError}
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert severity="error" variant="filled" sx={{ width: "100%" }}>
+          {state.mainError}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }

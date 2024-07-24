@@ -1,6 +1,7 @@
 import { CountryModel } from "@/app/domain/models"
 
 interface FormStateTypes {
+  mainError: string
   countriesAndStatesList: Array<CountryModel>
   countriesList: Array<string>
   currentCountry: string
@@ -11,9 +12,11 @@ interface FormStateTypes {
   citiesList: Array<string>
   currentCity: string
   isCityLoading: boolean
+  cityMessageSuccess: boolean
 }
 
 export const initialState: FormStateTypes = {
+  mainError: "",
   countriesAndStatesList: [],
   countriesList: [],
   currentCountry: "",
@@ -23,5 +26,6 @@ export const initialState: FormStateTypes = {
   isStateLoading: false,
   citiesList: [],
   currentCity: "",
-  isCityLoading: false
+  isCityLoading: false,
+  cityMessageSuccess: false
 }

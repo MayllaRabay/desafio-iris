@@ -16,9 +16,10 @@ export class RemoteGetCities implements GetCities {
       requestOptions
     ).then((response) => response.json())
 
-    console.log("data: ", data)
-    console.log("error: ", error)
-    console.log("msg: ", msg)
-    return data
+    if (error) {
+      throw new Error(msg)
+    } else {
+      return data
+    }
   }
 }
