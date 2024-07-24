@@ -3,7 +3,7 @@
 </h1>
 
 <h2 align="center"> 
-	🚧 Desafio Iris Data Tech 🚀 em andamento... 🚧
+	🚀 Desafio Iris Data Tech 🚀
 </h2>
 
 ## 💻 Sobre o projeto
