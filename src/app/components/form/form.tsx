@@ -232,7 +232,7 @@ export default function Form({
       >
         <Alert
           severity="success"
-          variant="outlined"
+          variant="filled"
           onClose={() => {
             setState((old) => ({ ...old, cityMessageSuccess: false }))
           }}
