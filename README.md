@@ -10,6 +10,8 @@
 
 Desafio técnico de front-end para o processo seletivo da Iris. O objetivo é realizar filtros para selecionar uma cidade, com selects de "país", "estado" e "cidade", utilizando Material-UI como biblioteca de CSS e o princípio Clean Code para o desenvolvimento.
 
+Api pública utilizada: [**Countries & Cities API**](https://documenter.getpostman.com/view/1134062/T1LJjU52#intro)
+
 ## 💡 Pré-requisitos
 
 - O primeiro passo é instalar o [**Git**](https://git-scm.com) em seu computador caso você ainda não o tenha.
