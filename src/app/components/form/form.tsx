@@ -6,7 +6,10 @@ import {
 } from "@/app/main/usecases"
 import {
   Alert,
+  Box,
   FormControl,
+  FormHelperText,
+  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -14,19 +17,63 @@ import {
 } from "@mui/material"
 import { useEffect, useState } from "react"
 import { initialState } from "./form-state"
-import styles from "./form-style.module.scss"
 
 export default function Form({
   getCountries = makeRemoteGetCountries(),
   getCities = makeRemoteGetCities()
 }) {
   const [state, setState] = useState(initialState)
+  const isStateDisabled =
+    (state.currentCountry && state.statesList.length === 0) ||
+    state.isStateLoading ||
+    !state.currentCountry
+  const isCityDisabled =
+    (state.currentState && state.citiesList.length === 0) ||
+    state.isCityLoading ||
+    !state.currentState
 
-  const selectInputStyle = {
-    boxShadow: 1,
-    borderRadius: 2,
-    color: "var(--color-theme)",
-    height: "3rem"
+  const selectStyle = {
+    "&& label, && p": {
+      color: "var(--color-gray-M)"
+    },
+    "&& fieldset": {
+      boxShadow: 1,
+      borderRadius: 2
+    },
+    "&& div": {
+      color: "var(--color-theme)",
+      fontWeight: "bold",
+      letterSpacing: "0.5px"
+    },
+    "&:hover": {
+      "&& label": {
+        color: "var(--color-theme)"
+      },
+      "&& fieldset": {
+        borderColor: "var(--color-theme)"
+      },
+      "&& svg": {
+        fill: "var(--color-theme)"
+      }
+    }
+  }
+
+  const disabledStyle = {
+    cursor: "not-allowed",
+    "&& *": {
+      cursor: "not-allowed"
+    },
+    "&& label, && p": {
+      color: "var(--color-gray-L)"
+    },
+    "&& fieldset": {
+      backgroundColor: "var(--color-gray-XL)",
+      boxShadow: 1,
+      borderRadius: 2
+    },
+    "&& input": {
+      borderColor: "var(--color-gray-L)"
+    }
   }
 
   const handleGetCountries = async () => {
@@ -105,26 +152,26 @@ export default function Form({
   }, [])
 
   return (
-    <div className={styles.formWrapper}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      rowGap="0.875rem"
+      width="100%"
+      maxWidth="40rem"
+    >
       <FormControl
         fullWidth
-        className={styles.fieldWrapper}
-        data-style={state.isCountryLoading && "disabled"}
+        size="small"
+        sx={state.isCountryLoading ? disabledStyle : selectStyle}
       >
-        <label htmlFor="country-select">País</label>
+        <InputLabel id="country-select-label">País</InputLabel>
         <Select
+          labelId="country-select-label"
           id="country-select"
-          displayEmpty
-          renderValue={
-            state.currentCountry !== ""
-              ? undefined
-              : () =>
-                  state.isCountryLoading ? "Carregando..." : "Selecione um País"
-          }
           value={state.currentCountry}
           onChange={handleChangeCountry}
           disabled={state.isCountryLoading}
-          sx={selectInputStyle}
+          label="País"
         >
           {state.countriesList?.map((country: string, index: number) => {
             return (
@@ -134,42 +181,28 @@ export default function Form({
             )
           })}
         </Select>
+        <FormHelperText>
+          {state.isCountryLoading
+            ? "Carregando..."
+            : state.currentCountry === ""
+            ? "Selecione um País"
+            : " "}
+        </FormHelperText>
       </FormControl>
 
       <FormControl
         fullWidth
-        className={styles.fieldWrapper}
-        data-style={
-          ((state.currentCountry && state.statesList.length === 0) ||
-            state.isStateLoading ||
-            !state.currentCountry) &&
-          "disabled"
-        }
+        size="small"
+        sx={isStateDisabled ? disabledStyle : selectStyle}
       >
-        <label htmlFor="state-select">Estado</label>
+        <InputLabel id="state-select-label">Estado</InputLabel>
         <Select
+          labelId="state-select-label"
           id="state-select"
-          displayEmpty
-          renderValue={
-            state.currentState !== ""
-              ? undefined
-              : () =>
-                  state.isStateLoading
-                    ? "Carregando..."
-                    : !state.currentCountry
-                    ? "Selecione antes um País"
-                    : state.currentCountry && state.statesList.length === 0
-                    ? "Nenhum Estado disponível..."
-                    : "Selecione um Estado"
-          }
           value={state.currentState}
           onChange={handleChangeState}
-          disabled={
-            (state.currentCountry && state.statesList.length === 0) ||
-            state.isStateLoading ||
-            !state.currentCountry
-          }
-          sx={selectInputStyle}
+          disabled={isStateDisabled}
+          label="Estado"
         >
           {state.statesList?.map((state: string, index: number) => {
             return (
@@ -179,42 +212,32 @@ export default function Form({
             )
           })}
         </Select>
+        <FormHelperText>
+          {state.isStateLoading
+            ? "Carregando..."
+            : !state.currentCountry
+            ? "Selecione antes um País"
+            : state.currentCountry && state.statesList.length === 0
+            ? "Nenhum Estado disponível..."
+            : state.currentState === ""
+            ? "Selecione um Estado"
+            : " "}
+        </FormHelperText>
       </FormControl>
 
       <FormControl
         fullWidth
-        className={styles.fieldWrapper}
-        data-style={
-          ((state.currentState && state.citiesList.length === 0) ||
-            state.isCityLoading ||
-            !state.currentState) &&
-          "disabled"
-        }
+        size="small"
+        sx={isCityDisabled ? disabledStyle : selectStyle}
       >
-        <label htmlFor="city-select">Cidade</label>
+        <InputLabel id="city-select-label">Cidade</InputLabel>
         <Select
+          labelId="city-select-label"
           id="city-select"
-          displayEmpty
-          renderValue={
-            state.currentCity !== ""
-              ? undefined
-              : () =>
-                  state.isCityLoading
-                    ? "Carregando..."
-                    : !state.currentState
-                    ? "Selecione antes um Estado"
-                    : state.currentState && state.citiesList.length === 0
-                    ? "Nenhuma Cidade disponível..."
-                    : "Selecione uma Cidade"
-          }
           value={state.currentCity}
           onChange={handleChangeCity}
-          disabled={
-            (state.currentState && state.citiesList.length === 0) ||
-            state.isCityLoading ||
-            !state.currentState
-          }
-          sx={selectInputStyle}
+          disabled={isCityDisabled}
+          label="Cidade"
         >
           {state.citiesList?.map((city: string, index: number) => {
             return (
@@ -224,7 +247,19 @@ export default function Form({
             )
           })}
         </Select>
+        <FormHelperText>
+          {state.isCityLoading
+            ? "Carregando..."
+            : !state.currentState
+            ? "Selecione antes um Estado"
+            : state.currentState && state.citiesList.length === 0
+            ? "Nenhuma Cidade disponível..."
+            : state.currentCity === ""
+            ? "Selecione uma Cidade"
+            : " "}
+        </FormHelperText>
       </FormControl>
+
       <Snackbar
         open={state.cityMessageSuccess}
         autoHideDuration={6000}
@@ -236,19 +271,24 @@ export default function Form({
           onClose={() => {
             setState((old) => ({ ...old, cityMessageSuccess: false }))
           }}
+          sx={{
+            backgroundColor: "var(--color-theme)",
+            fontWeight: "bold"
+          }}
         >
           Parabéns! Você encontrou sua cidade!
         </Alert>
       </Snackbar>
+
       <Snackbar
         open={!!state.mainError}
         autoHideDuration={6000}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert severity="error" variant="filled" sx={{ width: "100%" }}>
+        <Alert severity="error" variant="filled" sx={{ fontWeight: "bold" }}>
           {state.mainError}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   )
 }
