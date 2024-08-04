@@ -1,24 +1,7 @@
-import { CountryModel } from "@/app/domain/models"
+import { FormStateModel } from "@/app/domain/models"
 
-interface FormStateTypes {
-  mainError: string
-  countriesAndStatesList: Array<CountryModel>
-  countriesList: Array<string>
-  currentCountry: string
-  isCountryLoading: boolean
-  statesList: Array<string>
-  currentState: string
-  isStateLoading: boolean
-  citiesList: Array<string>
-  currentCity: string
-  isCityLoading: boolean
-  cityMessageSuccess: boolean
-}
-
-export const initialState: FormStateTypes = {
+export const initialState: FormStateModel = {
   mainError: "",
-  countriesAndStatesList: [],
-  countriesList: [],
   currentCountry: "",
   isCountryLoading: false,
   statesList: [],
