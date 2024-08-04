@@ -1,9 +1,7 @@
 "use client"
 import { CountryModel } from "@/app/domain/models"
-import {
-  makeRemoteGetCities,
-  makeRemoteGetCountries
-} from "@/app/main/usecases"
+import { makeRemoteGetCities } from "@/app/main/factories/usecases"
+import { useCountriesContext } from "@/app/main/providers"
 import {
   Alert,
   Box,
@@ -17,12 +15,13 @@ import {
 } from "@mui/material"
 import { useEffect, useState } from "react"
 import { initialState } from "./form-state"
+import { disabledStyle, selectStyle } from "./form-style"
 
-export default function Form({
-  getCountries = makeRemoteGetCountries(),
-  getCities = makeRemoteGetCities()
-}) {
+export default function Form() {
   const [state, setState] = useState(initialState)
+  const { countries } = useCountriesContext()
+  const countriesList = countries?.map((country: CountryModel) => country.name)
+  const cities = makeRemoteGetCities()
   const isStateDisabled =
     (state.currentCountry && state.statesList.length === 0) ||
     state.isStateLoading ||
@@ -32,74 +31,13 @@ export default function Form({
     state.isCityLoading ||
     !state.currentState
 
-  const selectStyle = {
-    "&& label, && p": {
-      color: "var(--color-gray-M)"
-    },
-    "&& fieldset": {
-      boxShadow: 1,
-      borderRadius: 2
-    },
-    "&& div": {
-      color: "var(--color-theme)",
-      fontWeight: "bold",
-      letterSpacing: "0.5px"
-    },
-    "&:hover": {
-      "&& label": {
-        color: "var(--color-theme)"
-      },
-      "&& fieldset": {
-        borderColor: "var(--color-theme)"
-      },
-      "&& svg": {
-        fill: "var(--color-theme)"
-      }
-    }
-  }
-
-  const disabledStyle = {
-    cursor: "not-allowed",
-    "&& *": {
-      cursor: "not-allowed"
-    },
-    "&& label, && p": {
-      color: "var(--color-gray-L)"
-    },
-    "&& fieldset": {
-      backgroundColor: "var(--color-gray-XL)",
-      boxShadow: 1,
-      borderRadius: 2
-    },
-    "&& input": {
-      borderColor: "var(--color-gray-L)"
-    }
-  }
-
-  const handleGetCountries = async () => {
-    setState((old) => ({ ...old, isCountryLoading: true, mainError: "" }))
-    try {
-      const responseCountries = await getCountries.get()
-      const countriesList = responseCountries?.map(
-        (country: any) => country.name
-      )
-      const countriesAndStatesList = responseCountries
-      setState((old) => ({ ...old, countriesList, countriesAndStatesList }))
-    } catch (error: any) {
-      setState((old) => ({ ...old, mainError: error.message }))
-    } finally {
-      setState((old) => ({ ...old, isCountryLoading: false }))
-    }
-  }
-
   const handleGetCities = async () => {
     setState((old) => ({ ...old, isCityLoading: true, mainError: "" }))
     try {
-      const responseCities = await getCities.get({
+      const citiesList = await cities.get({
         country: state.currentCountry,
         state: state.currentState
       })
-      const citiesList = responseCities
       setState((old) => ({ ...old, citiesList }))
     } catch (error: any) {
       setState((old) => ({ ...old, mainError: error.message }))
@@ -109,10 +47,9 @@ export default function Form({
   }
 
   const handleChangeCountry = (e: SelectChangeEvent<string>) => {
-    const currentCountryObject: Array<CountryModel> =
-      state.countriesAndStatesList.filter(
-        (item) => item.name === e.target.value
-      )
+    const currentCountryObject: Array<CountryModel> = countries.filter(
+      (item) => item.name === e.target.value
+    )
     const statesList = currentCountryObject[0].states.map((state) => state.name)
     setState((old) => ({
       ...old,
@@ -147,10 +84,6 @@ export default function Form({
     }
   }, [state.currentState])
 
-  useEffect(() => {
-    handleGetCountries()
-  }, [])
-
   return (
     <Box
       display="flex"
@@ -173,7 +106,7 @@ export default function Form({
           disabled={state.isCountryLoading}
           label="País"
         >
-          {state.countriesList?.map((country: string, index: number) => {
+          {countriesList?.map((country: string, index: number) => {
             return (
               <MenuItem key={index} value={country}>
                 {country}
